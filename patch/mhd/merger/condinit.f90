@@ -317,6 +317,13 @@ subroutine condinit(x,u,dx,nn)
   endif
 
 
+  ! Passive scalars not set below (e.g. the sf_virial scalar) start at zero
+#ifdef SOLVERmhd
+  q(1:nn,9:nvar)=0.0d0
+#else
+  q(1:nn,ndim+3:nvar)=0.0d0
+#endif
+
   a2=1d4 / scale_T2 ! sound speed squared
   aa=sqrt(a2)
 
@@ -1079,3 +1086,29 @@ subroutine read_vcirc_files
 end subroutine read_vcirc_files
 ! }}}
 !--------------------------------------------------------------------------------------
+!================================================================
+!================================================================
+! Stubs for routines that mhd/condinit.f90 (replaced by this patch)
+! provides for condinit_kind='collapse' and 'ponomarenko'.
+!================================================================
+!================================================================
+subroutine prep_collapse
+  use amr_commons, only:myid
+  implicit none
+  if(myid==1)write(*,*)'Error: condinit_kind=''collapse'' is not supported by the merger patch'
+  call clean_stop
+end subroutine prep_collapse
+!================================================================
+!================================================================
+subroutine velana_ponomarenko(x,v,dx,t,ncell)
+  use amr_parameters
+  use amr_commons, only:myid
+  implicit none
+  integer ::ncell                         ! Size of input arrays
+  real(dp)::dx                            ! Cell size
+  real(dp)::t                             ! Current time
+  real(dp),dimension(1:nvector,1:3)::v    ! Velocity field
+  real(dp),dimension(1:nvector,1:ndim)::x ! Cell center position.
+  if(myid==1)write(*,*)'Error: condinit_kind=''ponomarenko'' is not supported by the merger patch'
+  call clean_stop
+end subroutine velana_ponomarenko

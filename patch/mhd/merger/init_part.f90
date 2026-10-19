@@ -82,6 +82,7 @@
      allocate(move_flag(npartmax))
      move_flag = 0
   end if
+  allocate(dumpedp(npartmax))
   allocate(nextp (npartmax))
   allocate(prevp (npartmax))
   allocate(levelp(npartmax))
