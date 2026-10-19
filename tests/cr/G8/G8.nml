@@ -1,0 +1,159 @@
+! G8 isolated disc galaxy (J. Rosdahl ascii ICs, merger patch) with SN CR injection, ported from ramses_cral.
+! Build: NDIM=3 SOLVER=mhd DO_CR=1 NCRGRP=1 NPSCAL=2 PATCH=../patch/mhd/merger
+&RUN_PARAMS
+cosmo=.false.
+pic=.true.
+poisson=.true.
+hydro=.true.
+cr=.true.
+rt=.false.
+nrestart=0                          ! cral nrestart=999 fell back to scratch; sno stops if the output is missing
+nremap=5
+nsubcycle=1,1,15*2
+ncontrol=1
+/
+
+&OUTPUT_PARAMS
+foutput=500000
+tout=0.067, 0.335, 0.671, 1.342, 2.01, 2.68, 3.3557, 6.7114, 10.0671, 13.4228, 16.7785, 20.12, 23.48, 26.83, 30.19, 33.54, 34.55
+     ! 1, 5, 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 515 Myr
+/
+
+&INIT_PARAMS
+filetype='ascii'
+initfile(1)='/home/jrosdahl/runs/disk_ICs/G8_ICs/IC_1d10_low'
+B_ave=5.2e-3
+/
+
+&AMR_PARAMS
+levelmin=6
+levelmax=13
+ngridmax=200000
+npartmax=400000
+boxlen=150d0
+/
+
+&POISSON_PARAMS
+epsilon=1e-4
+/
+
+&BOUNDARY_PARAMS
+nboundary=6
+bound_type= 2, 2,  2,  2,  2,  2
+ibound_min=-1, 1, -1, -1, -1, -1
+ibound_max=-1, 1,  1,  1,  1,  1
+jbound_min= 0, 0, -1,  1, -1, -1
+jbound_max= 0, 0, -1,  1,  1,  1
+kbound_min= 0, 0,  0,  0, -1,  1
+kbound_max= 0, 0,  0,  0, -1,  1
+/
+
+&COOLING_PARAMS
+cooling=.true.
+z_ave=1d-1
+neq_chem=.false.
+metal=.true.
+haardt_madau=.true.
+self_shielding=.true.
+/
+
+&SF_PARAMS
+sf_virial=.true.                    ! cral star_maker='FK2' -> multi-ff PN model (Federrath & Klessen 2012)
+sf_model=2
+n_star=100.0                        ! density threshold, = cral n_gmc
+T2_star=10.0
+g_star=1.0
+eps_star=0.5                        ! FK2 used eps_star_loc (cral default 0.5), not eps_star=0.02
+/
+
+&FEEDBACK_PARAMS
+eta_sn=0.2                          ! thermal SN feedback: sno has no feedback_model='mechanical'
+yield=0.0
+t_sne=10.                           ! single SN delay: sno has no sn2_real_delay
+/
+
+&HYDRO_PARAMS
+gamma=1.66666667
+courant_factor=0.8
+slope_type=1
+scheme='muscl'
+pressure_fix=.true.
+beta_fix=0.5
+riemann='hlld'
+riemann2d='hlld'
+/
+
+&CR_PARAMS
+cr_advect=.false.                   ! switched on automatically: stars present and fecr>0
+fecr=0.1
+Dcr=1.0d28
+cr_c_fraction=1d-3
+cr_varvmax=.true.
+cr_nsubcycle=10
+cr_streaming_diffusion=.false.
+cr_streaming_heating=.false.
+cr_HLLE=.true.                      ! cral default
+cr_gradpcr_mom=.true.               ! cral default
+cr_efloor=1.0d-15                   ! cral smallcr
+cr_cooling=.false.
+/
+
+&REFINE_PARAMS
+mass_sph=1d-6  ! 1000 solar masses = 1.666 stellar particle masses.
+m_refine=10*8. ! Use 8 particles for med, 3 for low
+interpol_type=0
+interpol_var=1
+jeans_refine=20*4.0
+/
+
+&MERGER_PARAMS
+rad_profile='exponential'
+z_profile='gaussian'
+gal_center1=0.0,0.0,0.0
+gal_center2=1d5,1d5,1d5 ! Well outside the box
+Mgas_disk1=0.171951
+Mgas_disk2=0d0
+typ_radius1=0.686436
+typ_radius2=0.686436
+cut_radius1=5.01098
+cut_radius2=5.01098
+typ_height1=0.0686436
+typ_height2=0.0686436
+cut_height1=0.288303
+cut_height2=0.288303
+IG_density_factor=1d0
+Vcirc_dat_file1='/home/jrosdahl/runs/disk_ICs/G8_ICs/IC_1d10_low/Vcirc.dat'
+Vcirc_dat_file2='/home/jrosdahl/runs/disk_ICs/G8_ICs/IC_1d10_low/Vcirc.dat'
+ic_part_file_gal1='ic_part'
+ic_part_file_gal2='ic_part'
+gal_axis1=0,0,1
+gal_axis2=0,0,1
+Vgal1=0.0,0.0,0.0
+Vgal2=0.0,0.0,0.0
+mag_topology='test'
+/
+
+&MOVIE_PARAMS
+movie = .true.
+tstartmov=0.0
+tendmov = 34.55
+imovout=1500
+imov=1
+nw_frame=500 ! Movie frame resolution
+nh_frame=500
+levelmax_frame=13
+xcentre_frame= 75, 0., 0., 0.,  75, 0., 0., 0.
+ycentre_frame= 75, 0., 0., 0.,  75, 0., 0., 0.
+zcentre_frame= 75, 0., 0., 0.,  75, 0., 0., 0.
+deltax_frame= 10.0, 0.0,  10, 0.0
+deltay_frame= 10.0, 0.0,  10, 0.0
+deltaz_frame= 10.0, 0.0,  10, 0.0
+proj_axis='zx'
+movie_vars_txt = 'dens', 'temp', 'stars', 'P'   ! sno has no 'crflx_P'; 'Fp1','xHII','xHI' need RT
+perspective_camera = .true.,  .true.
+shader_frame =       'square', 'square'
+dtheta_camera=       0.,        0.
+phi_camera=          0.,        0.
+focal_camera=        100.,        100.
+dist_camera=         100.,        100.
+/
